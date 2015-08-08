@@ -24,7 +24,7 @@ class Model(object):
 
 		self.remove_columns(['institute_latitude', 'institute_longitude'])
 		
-		model = GradientBoostingRegressor(learning_rate=0.1, n_estimators=1000, min_samples_leaf=5)
+		model = GradientBoostingRegressor(learning_rate=0.1, n_estimators=1200)
 		model.fit(self.X, self.y)
 
 		return model
@@ -61,10 +61,12 @@ class Model(object):
 
 	def performance(self):
 
-		self.remove_columns(['institute_latitude', 'institute_longitude'])
+		self.remove_columns(['institute_state', 'institute_country', 'var10', 'var11', 
+							'var12', 'var13', 'var14', 'var15', 
+							'instructor_past_performance', 'instructor_association_industry_expert', 'secondary_area', 'var24'])
 		self.split_dataset()
 
-		model = GradientBoostingRegressor(learning_rate=0.1, n_estimators=1000)	
+		model = GradientBoostingRegressor(learning_rate=0.1, n_estimators=1200)	
 		model.fit(self.Xt, self.yt)
 
 		yt_pred = model.predict(self.Xt)
@@ -88,6 +90,9 @@ class Model(object):
 
 		self.test_df = self.test_df[self.test_df.columns.drop(['institute_latitude', 'institute_longitude'])]
 		return model.predict(self.test_df)
+
+	def sanitize_predictions(self, preds):
+		return [x if x >= 0 else 0 for x in preds]
 
 	def create_submission(self, filename, preds):
 		ids = self.test_df.index.values
